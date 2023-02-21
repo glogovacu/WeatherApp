@@ -63,19 +63,26 @@ public class MainActivity extends AppCompatActivity implements OpenMeteoApiClien
         txtgrad = findViewById(R.id.textView);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date currentDate = new Date();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(currentDate);
+        calendar.add(Calendar.DAY_OF_YEAR, 1);
+        Date tomorrowDate = calendar.getTime();
+        String tomorrowDateString = dateFormat.format(tomorrowDate);
         String currentDateString = dateFormat.format(currentDate);
+        Log.d("TAG", "Krajnje Vreme: " + tomorrowDateString);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String latitudeString = editTextLatitude.getText().toString().trim();
                 String longitudeString = editTextLongitude.getText().toString().trim();
-                double latitude = Double.parseDouble(latitudeString);
-                double longitude = Double.parseDouble(longitudeString);
+
                 if (!latitudeString.isEmpty() && !longitudeString.isEmpty()) {
+                    double latitude = Double.parseDouble(latitudeString);
+                    double longitude = Double.parseDouble(longitudeString);
                     try {
                         if (latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180) {
                             OpenMeteoApiClient.getWeatherForecast(latitude, longitude, MainActivity.this);
-                            OpenMeteoApiHourlyClient.getHourlyForecast(latitude,longitude,currentDateString, currentDateString, MainActivity.this);
+                            OpenMeteoApiHourlyClient.getHourlyForecast(latitude,longitude,currentDateString, tomorrowDateString, MainActivity.this);
                             try {
                                 // Get the address from the location
                                 List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
@@ -105,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements OpenMeteoApiClien
             }
         });
         OpenMeteoApiClient.getWeatherForecast(44.8, 20.4, MainActivity.this);
-        OpenMeteoApiHourlyClient.getHourlyForecast(44.8,20.4,currentDateString, currentDateString, MainActivity.this);
+        OpenMeteoApiHourlyClient.getHourlyForecast(44.8,20.4,currentDateString, tomorrowDateString, MainActivity.this);
 
     }
 
@@ -156,7 +163,9 @@ public class MainActivity extends AppCompatActivity implements OpenMeteoApiClien
     public void onHourlyForecastReceived(String hourlyForecast) {
         // implementation for hourly forecast receiver
         String apiResponse = hourlyForecast;
+        System.out.println(hourlyForecast);
         try {
+            boolean nasao = false;
             JSONObject jsonObject = new JSONObject(apiResponse);
             JSONObject hourly = jsonObject.getJSONObject("hourly");
 
@@ -165,7 +174,8 @@ public class MainActivity extends AppCompatActivity implements OpenMeteoApiClien
             JSONArray weatherCodeArray = hourly.getJSONArray("weathercode");
             List<String> timeList = new ArrayList<>();
             int currentIndex = -1;
-
+            Log.d("TAG", "Satnice" + timeArray.length());
+            Log.d("TAG", "Temperature" + temperatureArray.length());
             for (int i = 0; i < timeArray.length(); i++) {
                 long unixTime = timeArray.getLong(i);
                 Date date = new Date(unixTime * 1000L); // Convert unixtime to Java Date
@@ -177,10 +187,12 @@ public class MainActivity extends AppCompatActivity implements OpenMeteoApiClien
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTime(date);
                 int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
-                if (currentHour == Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
+                if (currentHour == Calendar.getInstance().get(Calendar.HOUR_OF_DAY) && nasao!=true) {
                     currentIndex = i;
+                    nasao = true;
                 }
             }
+
             for (int i = 0; i < 3; i++) {
                 txtTempSat[i].setText(String.valueOf(temperatureArray.getDouble(currentIndex + i+1))+"°C");
                 txtVreme[i].setText(timeList.get(currentIndex + i+1));

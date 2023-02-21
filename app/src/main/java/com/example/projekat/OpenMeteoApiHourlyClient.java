@@ -1,6 +1,8 @@
 package com.example.projekat;
 
 import android.os.AsyncTask;
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -20,6 +22,7 @@ public class OpenMeteoApiHourlyClient {
                     String endDate = params[3];
 
                     URL url = new URL(OPEN_METEO_API_ENDPOINT + "?latitude=" + latitude + "&longitude=" + longitude + "&hourly=temperature_2m&hourly=weathercode&timeformat=unixtime" + "&start_date=" + startDate + "&end_date=" + endDate);
+                    Log.d("TAG", "Brate: " + url);
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("GET");
 

@@ -1,5 +1,7 @@
 package com.example.projekat;
 import android.os.AsyncTask;
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -16,6 +18,7 @@ public class OpenMeteoApiClient {
                     double latitude = params[0];
                     double longitude = params[1];
                     URL url = new URL(OPEN_METEO_API_ENDPOINT + "?latitude=" + latitude + "&longitude=" + longitude + "&current_weather=true");
+
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("GET");
 
